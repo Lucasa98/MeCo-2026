@@ -18,6 +18,7 @@ function x = coeficientes_centrada(k, p)
   b = zeros(N, 1);
   b(k) = factorial(k);
 
+  % Resolver sistema y agregar coeficiente de nodo central
   c = M \ b;
   x = [c(1:m); -sum(c); c(m+1:end)];
 endfunction
