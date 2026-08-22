@@ -1,4 +1,4 @@
-function x = coeficientes_descentrada(k,p)
+function x = coeficientes_descentrada(k,p,izq = false)
   % k: orden de la derivada
   % p: orden de precision
 
@@ -19,4 +19,9 @@ function x = coeficientes_descentrada(k,p)
   % Resolver sistema y agregar coeficiente de nodo 0
   c = M \ b;
   x = [-sum(c); c(:)];
+
+  % descentrada izquierda: cambia de signo si k es impar
+  if(izq)
+    x = (-1)^k * flip(x);
+  endif
 endfunction
