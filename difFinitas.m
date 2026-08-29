@@ -42,7 +42,8 @@ function [T] = difFinitas(xnode, model, cb, et)
     d_i(1) = cb(1,2);
   elseif (cb(1,1) == 2)
     % neumann
-    % POST DIRICH
+    M(1,:) = [-(2+h^2*c/k),2, zeros(1,N)];
+    d_i(1) = - h^2*G(xnode(1))/k - 2*h*cb(1,2)/k;
   elseif (cb(1,1) == 3)
     % robin
     % POST NEUMANN
@@ -55,8 +56,9 @@ function [T] = difFinitas(xnode, model, cb, et)
     d_i(end) = cb(2,2);
   elseif (cb(2,1) == 2)
     % neumann
-    % POST DIRICH
-  elseif (cb(1,1) == 3)
+    M(end,:) = [zeros(1,N), 2,-(2+h^2*c/k)];
+    d_i(end) = - h^2*G(xnode(end))/k - 2*h*cb(2,2)/k;
+  elseif (cb(2,1) == 3)
     % robin
     % POST NEUMANN
   endif
