@@ -43,10 +43,11 @@ function [T] = difFinitas(xnode, model, cb, et)
   elseif (cb(1,1) == 2)
     % neumann
     M(1,:) = [-(2+h^2*c/k),2, zeros(1,N)];
-    d_i(1) = - h^2*G(xnode(1))/k - 2*h*cb(1,2)/k;
+    d_i(1) = - h^2*G(xnode(1))/k - 2*h*cb(1,2)/k;     % normal exterior. Para normal interior: + 2*h*cb(1,2)/k
   elseif (cb(1,1) == 3)
     % robin
-    % POST NEUMANN
+    M(1,:) = [-(2 + (h^2*c/k) + (2*h*cb(1,2)/k)), 2, zeros(1,N)];
+    d_i(1) = - h^2*G(xnode(1))/k - 2*h*cb(1,2)*cb(1,3)/k;
   endif
 
   % condicion por derecha
@@ -57,10 +58,11 @@ function [T] = difFinitas(xnode, model, cb, et)
   elseif (cb(2,1) == 2)
     % neumann
     M(end,:) = [zeros(1,N), 2,-(2+h^2*c/k)];
-    d_i(end) = - h^2*G(xnode(end))/k - 2*h*cb(2,2)/k;
+    d_i(end) = - h^2*G(xnode(end))/k - 2*h*cb(2,2)/k; % normal exterior. Para normal interior: + 2*h*cb(2,2)/k
   elseif (cb(2,1) == 3)
     % robin
-    % POST NEUMANN
+    M(end,:) = [zeros(1,N), 2, -(2 + (h^2*c/k) + (2*h*cb(2,2)/k))];
+    d_i(end) = - h^2*G(xnode(end))/k - 2*h*cb(2,2)*cb(2,3)/k;
   endif
 
   % resolver sistema
