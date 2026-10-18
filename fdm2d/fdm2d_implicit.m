@@ -1,22 +1,25 @@
-function [PHI, Q] = fdm2d_implicit(K, F, xnode, neighb, model, dt)
-    % Resolucion del sistema con esquema temporal implicito (Backward Euler), o sea
-    % la ec. (168) con theta = 1. Despejando se llega a la ec. (171):
-    %
-    %   K_imp = (rho*cp/dt)*I + K        F_imp = F + (rho*cp/dt)*phi^n
-    %   K_imp * phi^{n+1} = F_imp
-    %
-    % es decir un sistema lineal por iteracion. Es incondicionalmente estable, por
-    % lo que dt es arbitrario. La primer columna de la salida es la condicion
-    % inicial, y su par de columnas en Q es cero (aun no se evaluo ningun flujo).
-    %
-    % K      [nnodesxnnodes sparse double]: matriz del sistema (difusion + reaccion)
-    % F      [nnodesx1      sparse double]: vector de flujo termico
-    % xnode  [nnodesx2      double]: coordenadas (x,y), para evaluar el flujo
-    % neighb [nnodesx4      int]: vecindad [S E N W], para evaluar el flujo
-    % model  [1x1           struct]: se usan nnodes, k, rho, cp, maxit, tol y PHI_n
-    % dt     [1x1           double]: paso temporal (arbitrario)
-    % PHI    [nnodesx(nit+1)     double]: una columna por iteracion
-    % Q      [nnodesx(2*(nit+1)) double]: un par (Qx,Qy) por columna de PHI
+function [PHI, Q] = fdm2d_implicit(K,F,xnode,neighb,model,dt)
+% Descripción: módulo para resolver el sistema lineal de ecuaciones utilizando esquema
+% temporal implícito.
+
+% Entrada:
+% * K: matriz del sistema (difusión + reacción)
+% * F: vector de flujo térmico.
+% * xnode: matriz de nodos con pares (x,y) representando las coordenadas de cada nodo 
+% de la malla.
+% * neighb: matriz de vecindad.
+% * model: struct con todos los datos del modelo (constantes, esquema numérico, etc.)
+% * dt: paso temporal crítico para método explícito.
+
+% Salida:
+% * PHI: matriz solución. Cada elemento del vector representa un valor escalar 
+%   asociado a cada nodo de la malla, y su posición dentro del vector depende de
+%   cómo se especificó cada nodo en xnode. Cada columna representa una iteración
+%   del esquema temporal (en total nit columnas).
+% * Q: matriz de flujo de calor. Para cada nodo se halla un vector bidimensional
+%   de flujo de calor, representado por un par (Qx,Qy). Cada par de columnas 
+%   representa una iteración del esquema temporal (en total 2×nit columnas).
+% ----------------------------------------------------------------------
 
     nnodes = model.nnodes;
     a = model.rho * model.cp / dt;
@@ -51,4 +54,4 @@ function [PHI, Q] = fdm2d_implicit(K, F, xnode, neighb, model, dt)
 
     PHI = PHI(:, 1:nit + 1);
     Q   = Q(:, 1:2 * (nit + 1));
-endfunction
+end

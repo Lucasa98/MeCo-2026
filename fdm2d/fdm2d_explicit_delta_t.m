@@ -11,3 +11,4 @@ function [dt] = fdm2d_explicit_delta_t(xnode,model)
     nd = 2;                     % porque estamos en 2D
     dt = 0.25*delta^2/(alpha*nd);
 end
+

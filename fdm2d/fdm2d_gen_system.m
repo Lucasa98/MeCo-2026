@@ -1,26 +1,21 @@
-function [K, F] = fdm2d_gen_system(K, F, xnode, neighb, k, c, G)
-    % Ensamble de los terminos difusivo, reactivo y fuente para todos los nodos de
-    % la malla, generando el stencil adecuado segun el nodo sea interior o de
-    % frontera. Por cada eje se arman los tres coeficientes de la derivada segunda:
-    % 'a' para el vecino positivo (E o N), 'c' para el negativo (W o S) y 'b' para
-    % el propio nodo.
-    %
-    % En un nodo interior salen de la ec. (35), valida para espaciado no uniforme.
-    % En un nodo de frontera el vecino que falta es un nodo ficticio ubicado a la
-    % misma distancia que su opuesto, con lo que su coeficiente se pliega sobre el
-    % vecino real (que duplica su contribucion) y desaparece de K: es el stencil de
-    % la ec. (38). La ecuacion que falta la aportan neumann/robin/dirichlet.
-    %
-    % Los coeficientes se ASIGNAN, no se acumulan: este modulo define la fila de
-    % cada nodo, y las demas posiciones de K quedan como estaban.
-    %
-    % K      [nnodesxnnodes sparse double]: matriz del sistema (difusion + reaccion)
-    % F      [nnodesx1      sparse double]: vector de flujo termico
-    % xnode  [nnodesx2      double]: coordenadas (x,y) de cada nodo
-    % neighb [nnodesx4      int]: vecindad [S E N W], -1 si el vecino no existe
-    % k      [nnodesx1      double]: conductividad termica, distribucion k(x,y)
-    % c      [nnodesx1      double]: constante de reaccion, distribucion c(x,y)
-    % G      [nnodesx1      double]: fuente de calor, distribucion G(x,y)
+function [K,F] = fdm2d_gen_system(K,F,xnode,neighb,k,c,G)
+% Descripción: módulo para ensamblar los términos difusivo, reactivo y fuente de
+% todos los nodos de la malla, generando el stencil adecuado dependiendo de si es
+% un nodo interior o de frontera.
+
+% Entrada:
+% * K: matriz del sistema (difusión + reacción)
+% * F: vector de flujo térmico.
+% * xnode: matriz de pares (x,y) representando cada nodo de la malla.
+% * neighb: matriz de vecindad.
+% * k: conductividad térmica del material. Es un vector que permite representar k(x,y).
+% * c: constante de reacción del material. Es un vector que permite representar c(x,y).
+% * G: fuente de calor. Es un vector que permite representar G(x,y).
+
+% Salida:
+% * K: matriz del sistema (difusión + reacción) con modificaciones luego del ensamble.
+% * F: vector de flujo térmico con modificaciones luego del ensamble.
+% ----------------------------------------------------------------------
 
     S = 1; E = 2; N = 3; W = 4;
 
@@ -51,7 +46,7 @@ function [K, F] = fdm2d_gen_system(K, F, xnode, neighb, k, c, G)
     K(sub2ind(size(K), P(hayE), vE(hayE))) = -k(hayE) .* ax(hayE);
     K(sub2ind(size(K), P(hayN), vN(hayN))) = -k(hayN) .* ay(hayN);
     K(sub2ind(size(K), P(hayW), vW(hayW))) = -k(hayW) .* cx(hayW);
-endfunction
+end
 
 function [a, b, cc] = coeficientes(hayPos, hayNeg, dpos, dneg)
     % Coeficientes de la derivada segunda sobre un eje. Si falta el vecino
@@ -74,4 +69,4 @@ function [a, b, cc] = coeficientes(hayPos, hayNeg, dpos, dneg)
     a(amb)  =  2 ./ (dpos(amb) .* (dpos(amb) + dneg(amb)));
     b(amb)  = -2 ./ (dpos(amb) .* dneg(amb));
     cc(amb) =  2 ./ (dneg(amb) .* (dpos(amb) + dneg(amb)));
-endfunction
+end

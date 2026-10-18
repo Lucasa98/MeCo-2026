@@ -1,18 +1,18 @@
-function [Q] = fdm2d_flux(PHI, neighb, xnode, k)
-    % Calculo del flujo de calor en todo el dominio por la Ley de Fourier,
-    %
-    %   Q = -k * grad(phi)     ->   Qx = -k*dphi/dx,  Qy = -k*dphi/dy
-    %
-    % Cada derivada se aproxima por diferencias sobre el propio eje: si el nodo
-    % tiene sus dos vecinos se usa la diferencia centrada entre ellos, y si es un
-    % nodo de frontera se usa la diferencia de dos puntos contra el unico vecino
-    % que existe sobre ese eje.
-    %
-    % PHI    [nnodesx1 sparse double]: solucion sobre la que se evalua el flujo
-    % neighb [nnodesx4 int]: vecindad [S E N W], -1 si el vecino no existe
-    % xnode  [nnodesx2 double]: coordenadas (x,y) de cada nodo
-    % k      [nnodesx1 double]: conductividad termica, distribucion k(x,y)
-    % Q      [nnodesx2 double]: par (Qx,Qy) por nodo
+function [Q] = fdm2d_flux(PHI,neighb,xnode,k)
+% Descripción: módulo calcular el flujo de calor en todo el dominio. Se aplica la
+% Ley de Fourier y se evalúa como fluye el calor en todos los puntos (nodos) del dominio.
+
+% Entrada:
+% * K: matriz del sistema (difusión + reacción)
+% * F: vector de flujo térmico.
+% * PHI: vector solución. Cada elemento del vector representa un valor escalar asociado
+% a cada nodo de la malla, y su posición dentro del vector depende de cómo se especificó
+% cada nodo en xnode.
+
+% Salida:
+% * Q: vector de flujo de calor. Para cada nodo se halla un vector bidimensional de 
+%   flujo de calor, representado por un par (Qx,Qy)
+% ----------------------------------------------------------------------
 
     S = 1; E = 2; N = 3; W = 4;
 
@@ -23,7 +23,7 @@ function [Q] = fdm2d_flux(PHI, neighb, xnode, k)
     dphidy = derivada_eje(phi, xnode(:, 2), neighb, N, S);
 
     Q = [-k .* dphidx, -k .* dphidy];
-endfunction
+end
 
 function [d] = derivada_eje(phi, x, neighb, pos, neg)
     % Derivada de phi respecto del eje cuyas coordenadas son x, en todos los nodos.
@@ -42,4 +42,4 @@ function [d] = derivada_eje(phi, x, neighb, pos, neg)
     A(soloN) = find(soloN);      B(soloN) = vn(soloN);
 
     d = (phi(A) - phi(B)) ./ (x(A) - x(B));
-endfunction
+end
