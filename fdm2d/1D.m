@@ -1,4 +1,4 @@
-close all; clear all; more off;
+clc; close all; clear all; more off;
 
 % Problema 1D no estacionario resuelto con fdm2d:
 %   dT/dt - d2T/dx2 = 100,     0 <= x <= 1,  t >= 0
