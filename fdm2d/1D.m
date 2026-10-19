@@ -86,7 +86,7 @@ nit = size(PHI,2) - 1;
 t   = (0:nit) * model.dt;
 
 % Nodo en x = 1/2 (fila de abajo; la de arriba es identica)
-nodo  = find(abs(xnode(:,1) - 0.5) < 1e-12 & xnode(:,2) == 0)
+nodo  = find(abs(xnode(:,1) - 0.5) < 1e-12 & xnode(:,2) == 0);
 T_med = PHI(nodo, :);
 
 printf('dt = %g, pasos hasta tolerancia = %d (t = %g)\n', model.dt, nit, t(end));
@@ -116,3 +116,22 @@ legend('t = 0', sprintf('t = %g', t(n)), sprintf('t = %g', t(end)), 'estacionari
        'location', 'southeast');
 
 disp('Finalizado el post-procesamiento.');
+
+% Error relativo de la solucion estacionaria respecto a la exacta
+% T_ex(x) = 25 x (3 - 2x)
+disp('---------------------------------------------------------------');
+disp('Calculando el error relativo de la solucion estacionaria...');
+
+model_est    = model;
+model_est.ts = 2;   % estacionario
+PHI_est = fdm2d(xnode, icone, DIR, NEU, ROB, model_est);
+
+% Para comparar con el estado final del transitorio: PHI(1:2:end, end)
+T_est = PHI_est(1:2:end);   % fila de abajo.
+T_ex  = 25 * x .* (3 - 2*x);
+
+err_2   = norm(T_est - T_ex) / norm(T_ex);
+err_inf = norm(T_est - T_ex, Inf) / norm(T_ex, Inf);
+
+printf('Error relativo estacionario (norma 2)   = %e\n', err_2);
+printf('Error relativo estacionario (norma inf) = %e\n', err_inf);
