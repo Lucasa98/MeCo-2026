@@ -123,10 +123,9 @@ end
 % Temperatura en puntos especificos (bilineal entre nodos, exacta sobre un nodo)
 puntos = [
     1/2, 1/2;   % centro
-    1/3, 1/3;
-    2/3, 2/3;
-    1/2, 0;     % medio del borde inferior (Robin)
-    1,   1/2;   % medio del borde derecho (aislado)
+    0.25, 0.25;
+    1.0, 0.0;
+    0.5, 0.5;
 ];
 Tp = interp2(X, Y, Tg, puntos(:,1), puntos(:,2));
 for p = 1:rows(puntos)

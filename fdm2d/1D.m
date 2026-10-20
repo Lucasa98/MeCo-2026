@@ -1,21 +1,6 @@
 clc; close all; clear all; more off;
 
-% Problema 1D no estacionario resuelto con fdm2d:
-%   dT/dt - d2T/dx2 = 100,     0 <= x <= 1,  t >= 0
-%   T(0,t)     = 0
-%   dT/dx(1,t) = -T(1,t)       (Robin: -k dT/dx = h (T - phi_inf), k = h = 1, phi_inf = 0)
-%   T(x,0)     = 10 x (1-x)^2
-% 41 nodos uniformes, esquema implicito con lambda = 40, tolerancia 1e-4.
-% Se busca el primer instante en que T(1/2,t) > 23.
-%
-% fdm2d no admite una malla de una sola fila: un nodo sin vecinos N ni S tiene
-% distancia nula en y y fdm2d_gen_system divide por cero. Se usa una franja de
-% dos filas de nodos (y = 0 e y = dy). En los bordes de arriba y abajo no se
-% impone nada, que en fdm2d equivale a Neumann homogeneo (flujo nulo en y).
-% Por simetria las dos filas quedan iguales, el termino en y se anula y queda
-% exactamente el problema 1D.
-
-nx = 41;                    % numero de nodos
+nx = 21;                    % numero de nodos
 L  = 1;
 x  = linspace(0, L, nx)';   % valores de x
 dx = L / (nx - 1);          % delta x
@@ -38,31 +23,36 @@ izq = [1; 2];               % nodos en x = 0
 der = [2*nx-1; 2*nx];       % nodos en x = 1
 
 % T(0,t) = 0
-DIR = [izq, zeros(2,1)];
+DIR = [
+%  izq, zeros(2,1);
+];
 
 % ROB [nodo, q, direccion (S, E, N, W)]
 NEU = [
+  izq, 10*ones(2,1), 4*ones(2,1);
 ];
 
 % ROB [nodo, h, T_inf, direccion (S, E, N, W)]
 % dT/dx(1,t) = -T(1,t): h = 1, phi_inf = 0, flujo en direccion E (2)
-ROB = [der, ones(2,1), zeros(2,1), 2*ones(2,1)];
+ROB = [
+  der, 5*ones(2,1), zeros(2,1), 2*ones(2,1)
+];
 
 disp('---------------------------------------------------------------');
 disp('Inicializando modelo de datos...');
 
 model.nnodes = size(xnode,1);
 
-model.k = ones(model.nnodes,1);         % k = 1
-model.c = zeros(model.nnodes,1);        % c = 0
-model.G = 100*ones(model.nnodes,1);     % G = 100
+model.k = 2*ones(model.nnodes,1);
+model.c = 3*ones(model.nnodes,1);
+model.G = 60*ones(model.nnodes,1);
 
 % Esquema Temporal: [0] Explícito, [1] Implícito, [X] Estacionario
-model.ts = 1;
+model.ts = 2;
 
 % Parámetros para esquemas temporales
-model.rho = 1;
-model.cp = 1;
+model.rho = 2;
+model.cp = 2;
 lambda = 40;                                            % lambda = k dt / (rho cp dx^2)
 model.dt = lambda * model.rho * model.cp * dx^2 / min(model.k);
 model.maxit = 100000;
@@ -81,6 +71,11 @@ disp('Finalizada la ejecución del método numérico.');
 
 disp('---------------------------------------------------------------');
 disp('Iniciando el post-procesamiento...');
+
+% Temperatura en los nodos de y = 0: columna 1 = x, resto = T en cada paso
+ib = xnode(:,2) == 0;
+disp('    x         T');
+disp([xnode(ib,1), full(PHI(ib,:))]);
 
 nit = size(PHI,2) - 1;
 t   = (0:nit) * model.dt;
